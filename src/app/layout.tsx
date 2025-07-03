@@ -6,8 +6,8 @@ import { Toaster } from '@/components/ui/sonner'
 import { fonts } from '@/lib/fonts'
 
 export const metadata: Metadata = {
-  title: 'frutero club',
-  description: 'crea tu app en 6 semanas',
+  title: 'Frutero Club',
+  description: 'La comunidad de Builders que crea Founders',
   icons: [{ rel: 'icon', url: '/favicon.ico' }],
 }
 

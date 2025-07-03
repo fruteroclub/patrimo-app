@@ -1,5 +1,5 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -49,20 +49,20 @@
 
 :root {
   --radius: 0.65rem;
-  --background: oklch(0.141 0.005 285.823);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.21 0.006 285.885);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.21 0.006 285.885);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.795 0.184 86.047);
-  --primary-foreground: oklch(0.141 0.005 285.823);
-  --secondary: oklch(0.274 0.006 286.033);
-  --secondary-foreground: oklch(0.985 0 0);
+  --background: oklch(0.9895 0.009 78.28);
+  --foreground: oklch(0.0969 0 0);
+  --card: oklch(0.9851 0 0);
+  --card-foreground: oklch(0.0969 0 0);
+  --popover: oklch(0.9851 0 0);
+  --popover-foreground: oklch(0.0969 0 0);
+  --primary: oklch(0.7652 0.1752 62.57);
+  --primary-foreground: oklch(0.9851 0 0);
+  --secondary: oklch(0.6519 0.2118 22.71);
+  --secondary-foreground: oklch(0.9851 0 0);
   --muted: oklch(0.274 0.006 286.033);
-  --muted-foreground: oklch(0.705 0.015 286.067);
-  --accent: oklch(0.274 0.006 286.033);
-  --accent-foreground: oklch(0.985 0 0);
+  --muted-foreground: oklch(0.3407 0 0);
+  --accent: oklch(0.7989 0.1902 126.36);
+  --accent-foreground: oklch(0.0969 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
@@ -129,7 +129,7 @@
   }
 
   .page {
-    @apply flex h-full w-full flex-col items-center pb-8 pt-2 md:py-12;
+    @apply flex h-full w-full flex-col items-center pt-2 pb-8 md:py-12;
   }
 
   .container {
@@ -141,7 +141,7 @@
   }
 
   h1 {
-    @apply font-funnel text-5xl font-medium !leading-[1.2] tracking-tight;
+    @apply font-funnel text-5xl !leading-[1.2] font-medium tracking-tight;
   }
 
   a {

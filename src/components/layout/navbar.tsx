@@ -21,17 +21,12 @@ const MENU_ITEMS: MenuItemType[] = [
     isMobileOnly: false,
   },
   {
-    displayText: 'feria',
-    href: '/feria',
-    isMobileOnly: false,
-  },
-  {
     displayText: 'ecosistema',
     href: '/ecosistema',
     isMobileOnly: false,
   },
   { displayText: 'recursos', href: '/recursos', isMobileOnly: false },
-  { displayText: 'nosotros', href: '/nosotros', isMobileOnly: false },
+  { displayText: '$PULPA', href: '/pulpa', isMobileOnly: false },
 ]
 
 export default function Navbar() {

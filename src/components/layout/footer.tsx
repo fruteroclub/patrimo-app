@@ -67,7 +67,7 @@ export default function Footer({
 }) {
   return (
     <footer className="w-full bg-background">
-      <div className="mx-auto max-w-7xl px-4 py-4 md:flex md:items-center md:justify-between md:px-6 md:py-6 lg:px-8 lg:pb-4">
+      <div className="mx-auto max-w-7xl p-4 md:flex md:items-center md:justify-between md:px-6 md:py-6 lg:px-8">
         <div className="flex items-center justify-center gap-x-8 md:order-2">
           {navigation.map((item) => (
             <div key={item.name}>
