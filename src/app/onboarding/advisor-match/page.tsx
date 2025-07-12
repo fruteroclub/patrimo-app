@@ -42,14 +42,14 @@ export default function AdvisorMatchPage() {
   const handleAccept = () => {
     const selected = advisors[index]
     localStorage.setItem('selectedAdvisor', JSON.stringify(selected))
-    router.push('/portfolio') 
+    router.push('/dashboards/portfolio') 
   }
 
   const handleReject = () => {
     if (index + 1 < advisors.length) {
       setIndex(index + 1)
     } else {
-      router.push('/portfolio')
+      router.push('/dashboards/portfolio')
     }
   }
 
