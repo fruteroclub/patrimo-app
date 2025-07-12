@@ -20,48 +20,49 @@ export default function GetStarted() {
 
           {/* Diagrama funcional */}
           <div className="flex flex-wrap justify-center items-start gap-6">
-  {[
-    {
-      icon: <FaUserShield size={28} />,
-      title: "1. Crea tu cuenta",
-      text: "Conéctate con tu wallet y define tu perfil de riesgo.",
-    },
-    {
-      icon: <FaChartLine size={28} />,
-      title: "2. Recibe asesoría",
-      text: "Selecciona un asesor y recibe recomendaciones personalizadas.",
-    },
-    {
-      icon: <FaWallet size={28} />,
-      title: "3. Mantén el control",
-      text: "Tus fondos siempre están en tu wallet. Tú decides.",
-    },
-  ].map((step, index) => (
-    <div
-      key={index}
-      className="bg-muted text-muted-foreground border border-border rounded-xl p-6 w-64 shadow-md hover:shadow-lg transition-shadow duration-200"
-    >
-      <div className="flex justify-center text-primary mb-4">
-        {step.icon}
-      </div>
-      <h2 className="text-xl font-semibold mb-2 text-foreground">{step.title}</h2>
-      <p className="text-sm">{step.text}</p>
-    </div>
-  ))}
-</div>
+            {[
+              {
+                icon: <FaUserShield size={28} />,
+                title: "1. Crea tu cuenta",
+                text: "Conéctate con tu wallet y define tu perfil de riesgo.",
+              },
+              {
+                icon: <FaChartLine size={28} />,
+                title: "2. Recibe asesoría",
+                text: "Selecciona un asesor y recibe recomendaciones personalizadas.",
+              },
+              {
+                icon: <FaWallet size={28} />,
+                title: "3. Mantén el control",
+                text: "Tus fondos siempre están en tu wallet. Tú decides.",
+              },
+            ].map((step, index) => (
+              <div
+                key={index}
+                className="bg-card text-card-foreground border border-border rounded-xl p-6 w-64 shadow-md hover:shadow-lg transition-shadow duration-200"
+              >
+                <div className="flex justify-center text-primary mb-4">
+                  {step.icon}
+                </div>
+                <h2 className="text-xl font-semibold mb-2">{step.title}</h2>
+                <p className="text-sm">{step.text}</p>
+              </div>
+            ))}
+          </div>
+
           {/* Botones de acción */}
           <div className="flex flex-col sm:flex-row justify-center gap-6 mt-10">
-            <Link href="/login">
-              <button className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:bg-primary/80 transition-all">
-                Iniciar sesión
-              </button>
-            </Link>
-            <Link href="/onboarding/risk-profile">
-              <button className="bg-muted text-muted-foreground px-6 py-3 rounded-lg font-semibold hover:bg-muted/80 transition-all">
-                Crear cuenta
-              </button>
-            </Link>
-          </div>
+  <Link href="/login">
+    <button className="bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:bg-primary/80 transition-all">
+      Iniciar sesión
+    </button>
+  </Link>
+  <Link href="/onboarding/risk-profile">
+    <button className="bg-card text-card-foreground border border-border px-6 py-3 rounded-lg font-semibold hover:bg-accent hover:text-accent-foreground transition-all">
+      Crear cuenta
+    </button>
+  </Link>
+</div>
         </section>
       </main>
 
