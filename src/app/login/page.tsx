@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useSession } from '@/hooks/useSession'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -37,9 +38,9 @@ export default function LoginPage() {
         </div>
         <p className="text-sm text-center text-muted-foreground">
           ¿No tienes cuenta?{' '}
-          <a href="/onboarding/risk-profile" className="text-primary underline">
+          <Link href="/onboarding" className="text-primary underline">
             Crear una
-          </a>
+          </Link>
         </p>
       </div>
     </div>
