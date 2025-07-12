@@ -4,8 +4,19 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import AdvisorCard from '@/components/onboarding/AdvisorCard'
 import ProgressDots from '@/components/onboarding/ProgressDots'
+import { usePortalWallet } from '@/hooks/usePortalWallet'
 
-const advisors = [
+interface Advisor {
+  name: string
+  title: string
+  rating: number
+  reviews: number
+  experience: number
+  specialties: string[]
+  image: string
+}
+
+const advisors: Advisor[] = [
   {
     name: 'Dr. Sofia Ramirez',
     title: 'CFP®',
@@ -13,7 +24,7 @@ const advisors = [
     reviews: 125,
     experience: 15,
     specialties: ['Planificación de jubilación', 'Inversiones', 'Impuestos'],
-    image: '/advisors/sofia.jpg', // Asegúrate de tener esta imagen en /public/advisors/
+    image: '/advisors/sofia.jpg',
   },
   {
     name: 'Juan Torres',
@@ -38,11 +49,16 @@ const advisors = [
 export default function AdvisorMatchPage() {
   const router = useRouter()
   const [index, setIndex] = useState(0)
+  const { createWallet } = usePortalWallet()
 
-  const handleAccept = () => {
+  const handleAccept = async () => {
     const selected = advisors[index]
     localStorage.setItem('selectedAdvisor', JSON.stringify(selected))
-    router.push('/dashboards/portfolio') 
+
+    // Generamos la wallet con Portal
+    await createWallet()
+
+    router.push('/dashboards/portfolio')
   }
 
   const handleReject = () => {
@@ -60,7 +76,11 @@ export default function AdvisorMatchPage() {
       <p className="text-center text-muted-foreground mb-4">
         {index + 1}/{advisors.length} matches
       </p>
-      <AdvisorCard advisor={advisors[index]} onReject={handleReject} onAccept={handleAccept} />
+      <AdvisorCard
+        advisor={advisors[index]}
+        onReject={handleReject}
+        onAccept={handleAccept}
+      />
     </main>
   )
 }
