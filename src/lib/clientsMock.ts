@@ -1,4 +1,14 @@
-export const mockClients = [
+// src/lib/clientsMock.ts
+
+export interface Client {
+    name: string
+    address: string
+    currentBalance: string
+    riskProfile: string
+    joinedAt: string
+  }
+  
+  export const clients: Client[] = [
     {
       name: 'Valentín Martínez',
       address: '0xabc123def456789...',
