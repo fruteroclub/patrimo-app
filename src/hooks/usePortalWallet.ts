@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { portal } from '@/lib/portal'
+import { getPortal } from '@/lib/portal'
 
 const ARBITRUM_SEPOLIA = 'eip155:421614'
 
@@ -10,8 +10,11 @@ export function usePortalWallet() {
   const [isLoading, setLoading] = useState(false)
   const [hasWallet, setHasWallet] = useState(false)
 
-  // 1. Crear Wallet
+  const portal = typeof window !== 'undefined' ? getPortal() : null
+
   const createWallet = async () => {
+    if (!portal) return
+
     setLoading(true)
     try {
       const addr = await portal.createWallet()
@@ -25,7 +28,6 @@ export function usePortalWallet() {
     }
   }
 
-  // 2. Cargar dirección previa desde localStorage
   useEffect(() => {
     const saved = localStorage.getItem('portal_address')
     if (saved) {
@@ -39,6 +41,5 @@ export function usePortalWallet() {
     isLoading,
     hasWallet,
     createWallet,
-    // fundWallet: (desactivado por ahora)
   }
 }
