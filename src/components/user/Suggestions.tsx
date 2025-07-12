@@ -1,0 +1,94 @@
+'use client'
+
+import { useState } from 'react'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+
+const mockSuggestions = [
+  {
+    id: 1,
+    advisor: 'Julio Flores',
+    amount: '500',
+    token: 'ETH',
+    note: 'ETH está en un buen punto de entrada, ideal para tu perfil moderado.',
+    status: 'pending',
+  },
+  {
+    id: 2,
+    advisor: 'Julio Flores',
+    amount: '300',
+    token: 'USDC',
+    note: 'Mover a stablecoins para proteger ganancias tras la subida reciente.',
+    status: 'pending',
+  },
+]
+
+export default function Suggestions() {
+  const [suggestions, setSuggestions] = useState(mockSuggestions)
+
+  const handleResponse = (id: number, accepted: boolean) => {
+    setSuggestions((prev) =>
+      prev.map((sug) =>
+        sug.id === id
+          ? { ...sug, status: accepted ? 'accepted' : 'rejected' }
+          : sug
+      )
+    )
+  }
+
+  const getBadgeVariant = (status: string) => {
+    if (status === 'pending') return 'outline'
+    if (status === 'accepted') return 'default'
+    return 'destructive'
+  }
+
+  return (
+    <div className="grid gap-4">
+      {suggestions.map((sug) => (
+        <Card key={sug.id}>
+          <CardHeader className="flex justify-between items-center">
+            <CardTitle className="text-lg">
+              Propuesta de {sug.advisor}
+            </CardTitle>
+            <Badge variant={getBadgeVariant(sug.status)}>
+              {sug.status === 'pending'
+                ? 'Pendiente'
+                : sug.status === 'accepted'
+                ? 'Aceptada'
+                : 'Rechazada'}
+            </Badge>
+          </CardHeader>
+
+          <CardContent className="space-y-2 text-sm">
+            <p>
+              <strong>Operación:</strong>{' '}
+              Convertir <span className="font-semibold">{`${sug.amount} MXNB`}</span>{' '}
+              a <span className="font-semibold">{sug.token}</span>
+            </p>
+            <p>
+              <strong>Motivo:</strong> {sug.note}
+            </p>
+          </CardContent>
+
+          {sug.status === 'pending' && (
+            <CardFooter className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => handleResponse(sug.id, false)}>
+                Rechazar
+              </Button>
+              <Button onClick={() => handleResponse(sug.id, true)}>
+                Aceptar
+              </Button>
+            </CardFooter>
+          )}
+        </Card>
+      ))}
+    </div>
+  )
+}

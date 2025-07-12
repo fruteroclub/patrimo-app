@@ -15,7 +15,7 @@ export default function LoginPage() {
   const handleLogin = () => {
     login(email)
     const isAdvisor = email.toLowerCase().includes('advisor')
-    const next = isAdvisor ? '/dashboards/advisor' : '/dashboards/portfolio'
+    const next = isAdvisor ? '/dashboards/advisor' : '/dashboards/user'
     router.push(next)
   }
 

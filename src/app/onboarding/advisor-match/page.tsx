@@ -58,14 +58,14 @@ export default function AdvisorMatchPage() {
     // Generamos la wallet con Portal
     await createWallet()
 
-    router.push('/dashboards/portfolio')
+    router.push('/dashboards/user')
   }
 
   const handleReject = () => {
     if (index + 1 < advisors.length) {
       setIndex(index + 1)
     } else {
-      router.push('/dashboards/portfolio')
+      router.push('/dashboards/user')
     }
   }
 
