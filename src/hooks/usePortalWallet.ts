@@ -25,25 +25,7 @@ export function usePortalWallet() {
     }
   }
 
-  // 2. Fundear con ETH (testnet)
-  const fundWallet = async () => {
-    try {
-      const response = await portal.receiveTestnetAsset(ARBITRUM_SEPOLIA, {
-        amount: '0.01',
-        token: 'NATIVE',
-      })
-  
-      if (response?.data?.txHash) {
-        console.log('✅ Wallet fundeada:', response.data.txHash)
-      } else {
-        console.warn('⚠️ No se recibió un txHash al fundear.')
-      }
-    } catch (err) {
-      console.error('❌ Error fundeando wallet:', err)
-    }
-}
-
-  // 3. Leer de localStorage si ya hay wallet
+  // 2. Cargar dirección previa desde localStorage
   useEffect(() => {
     const saved = localStorage.getItem('portal_address')
     if (saved) {
@@ -57,6 +39,6 @@ export function usePortalWallet() {
     isLoading,
     hasWallet,
     createWallet,
-    fundWallet,
+    // fundWallet: (desactivado por ahora)
   }
 }
