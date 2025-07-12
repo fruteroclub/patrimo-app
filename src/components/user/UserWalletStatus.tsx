@@ -5,34 +5,43 @@
 import { usePortalWallet } from '@/hooks/usePortalWallet'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Loader2 } from 'lucide-react'
 
 export default function UserWalletStatus() {
   const { address, hasWallet, isLoading, createWallet } = usePortalWallet()
 
-  if (isLoading) return <p className="text-center">Cargando wallet...</p>
-
-  if (!hasWallet) {
-    return (
-      <Card className="bg-yellow-50 border-yellow-300">
-        <CardHeader>
-          <CardTitle>Wallet no conectada</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-muted-foreground">Aún no has creado tu wallet de inversión.</p>
-          <Button onClick={createWallet}>Crear Wallet</Button>
-        </CardContent>
-      </Card>
-    )
-  }
-
   return (
-    <Card>
+    <Card className="border-dashed border-2">
       <CardHeader>
-        <CardTitle>Tu Wallet</CardTitle>
+        <CardTitle>Wallet de Usuario</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2">
-        <p><strong>Address:</strong> {address}</p>
-        <Button variant="outline">Depositar MXNB</Button>
+      <CardContent className="space-y-4">
+        {hasWallet ? (
+          <>
+            <p className="text-muted-foreground break-all">
+              Dirección conectada:
+              <br />
+              <span className="font-mono text-sm">{address}</span>
+            </p>
+            <p className="text-sm text-green-600">Tu wallet está activa y lista para operar.</p>
+          </>
+        ) : (
+          <>
+            <p className="text-muted-foreground">
+              Aún no tienes una wallet conectada. Puedes generar una al instante con Portal.
+            </p>
+            <Button onClick={createWallet} disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="animate-spin mr-2 h-4 w-4" />
+                  Generando...
+                </>
+              ) : (
+                'Crear Wallet'
+              )}
+            </Button>
+          </>
+        )}
       </CardContent>
     </Card>
   )
