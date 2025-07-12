@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { getPortal } from '@/lib/portal'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ARBITRUM_SEPOLIA = 'eip155:421614'
 
 export function usePortalWallet() {
