@@ -51,7 +51,7 @@ export default function Suggestions() {
 
       const tx = {
         from: address,
-        to: '0x000000000000000000000000000000000000dead', // dirección dummy
+        to: '0x000000000000000000000000000000000000dead',
         value: '0x2386f26fc10000', // 0.01 ETH
         data: '0x',
       }
@@ -61,6 +61,20 @@ export default function Suggestions() {
         chainId: 'eip155:421614',
         params: [tx],
       })
+
+      // ✅ Guardar actividad en localStorage para ActivityLog
+      const newEntry = {
+        date: new Date().toISOString().split('T')[0],
+        type: 'Compra',
+        token: sug.token,
+        amount: `${sug.mxnbAmount} MXNB`,
+        status: 'Ejecutada',
+        pnl: '+0%',
+      }
+
+      const stored = localStorage.getItem('user_activity_log')
+      const updatedLog = stored ? [newEntry, ...JSON.parse(stored)] : [newEntry]
+      localStorage.setItem('user_activity_log', JSON.stringify(updatedLog))
 
       toast.success(`Propuesta de ${sug.token} aceptada y transacción enviada`)
       handleResponse(sug.id, true)
@@ -103,7 +117,9 @@ export default function Suggestions() {
               <Button variant="outline" onClick={() => handleResponse(sug.id, false)}>
                 Rechazar
               </Button>
-              <Button onClick={() => handleAcceptSuggestionWithTx(sug)}>Aceptar y Ejecutar</Button>
+              <Button onClick={() => handleAcceptSuggestionWithTx(sug)}>
+                Aceptar y Ejecutar
+              </Button>
             </CardFooter>
           )}
         </Card>
