@@ -1,8 +1,11 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { usePortfolioContext } from '@/context/PortfolioContext'
 
 export default function PortfolioOverview() {
+  const { balance } = usePortfolioContext()
+
   return (
     <div className="grid gap-4 md:grid-cols-2">
       <Card>
@@ -10,7 +13,7 @@ export default function PortfolioOverview() {
           <CardTitle>Mi capital actual</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-semibold">$4,250.00</p>
+          <p className="text-2xl font-semibold">${balance.toLocaleString()}</p>
           <p className="text-sm text-muted-foreground">
             +12% desde el mes pasado 🎯 ¡Buen trabajo!
           </p>

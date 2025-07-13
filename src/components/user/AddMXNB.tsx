@@ -2,15 +2,18 @@
 
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
+import { usePortfolioContext } from '@/context/PortfolioContext'
 // import { Juno } from '@juno/onramp' // Descomenta cuando se tenga acceso
 
 export default function AddMXNB() {
   const JUNO_API_KEY = process.env.NEXT_PUBLIC_JUNO_API_KEY
+  const { updateBalance } = usePortfolioContext()
 
   const handleAddFunds = async () => {
     if (!JUNO_API_KEY) {
       toast.info('Función en desarrollo: se simula carga de 500 MXNB.')
-      toast.success('Se añadieron 500 MXNB a tu wallet')
+      updateBalance(500)
+      toast.success('Añadidos 500 MXNB a tu wallet')
       return
     }
 
@@ -24,7 +27,10 @@ export default function AddMXNB() {
       defaultPaymentMethod: 'card',
       defaultNetwork: 'arbitrum-sepolia',
       walletAddress: '0x...', // Reemplazar con wallet Portal
-      onSuccess: () => toast.success('MXNB añadido exitosamente'),
+      onSuccess: () => {
+        updateBalance(500)
+        toast.success('MXNB añadido exitosamente')
+      },
       onExit: () => toast.info('Operación cancelada'),
     })
     */
