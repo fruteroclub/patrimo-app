@@ -13,15 +13,15 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { usePortfolioContext } from '@/context/PortfolioContext'
-// import { Juno } from '@juno/onramp' // Descomentar cuando esté disponible
+// import { Juno } from '@juno/onramp' // Descomenta cuando se use off-ramp real
 
-export default function AddMXNB() {
+export default function WithdrawMXNB() {
   const [open, setOpen] = useState(false)
   const [amount, setAmount] = useState('')
   const { updateBalance } = usePortfolioContext()
   const JUNO_API_KEY = process.env.NEXT_PUBLIC_JUNO_API_KEY
 
-  const handleAdd = () => {
+  const handleWithdraw = () => {
     const value = parseFloat(amount)
     if (isNaN(value) || value <= 0) {
       toast.error('Cantidad inválida')
@@ -29,38 +29,38 @@ export default function AddMXNB() {
     }
 
     if (!JUNO_API_KEY) {
-      // Mock fallback mientras no se tenga acceso real
-      updateBalance(value)
+      // Simulación sin integración
+      updateBalance(-value)
       const newEntry = {
         date: new Date().toISOString().slice(0, 10),
-        type: 'Depósito',
+        type: 'Retiro',
         token: 'MXNB',
         amount: `${value} MXNB`,
-        status: 'Acreditado',
+        status: 'Procesado',
         pnl: '+0%',
       }
       const stored = localStorage.getItem('user_activity_log')
       const prev = stored ? JSON.parse(stored) : []
       localStorage.setItem('user_activity_log', JSON.stringify([newEntry, ...prev]))
 
-      toast.success(`Añadidos ${value} MXNB con éxito`)
+      toast.success(`Retirados ${value} MXNB`)
       setAmount('')
       setOpen(false)
       return
     }
 
-    // ✅ Integración real Juno — Descomenta cuando tengas el API KEY
+    // ✅ Integración real con Juno (off-ramp) — lista para habilitar
     /*
     const juno = new Juno(JUNO_API_KEY)
     juno.showWidget({
-      defaultFiatAmount: value,
+      defaultCryptoAmount: value,
       defaultFiatCurrency: 'MXN',
       defaultNetwork: 'arbitrum-sepolia',
-      defaultPaymentMethod: 'card',
-      walletAddress: '0x...REEMPLAZA...', // <- remplaza con address de Portal
+      defaultPaymentMethod: 'bank',
+      walletAddress: '0x...REEMPLAZA...', // <- tu wallet Portal
       onSuccess: () => {
-        updateBalance(value)
-        toast.success(`MXNB añadido exitosamente`)
+        updateBalance(-value)
+        toast.success(`MXNB retirados exitosamente`)
         setAmount('')
         setOpen(false)
       },
@@ -72,20 +72,20 @@ export default function AddMXNB() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="w-full">💰 Agregar MXNB</Button>
+        <Button variant="outline" className="w-full">🏧 Retirar MXNB</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>¿Cuánto MXNB deseas agregar?</DialogTitle>
+          <DialogTitle>¿Cuánto MXNB deseas retirar?</DialogTitle>
         </DialogHeader>
         <Input
           type="number"
-          placeholder="Ej. 500"
+          placeholder="Ej. 300"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
         />
         <DialogFooter>
-          <Button onClick={handleAdd}>Confirmar Depósito</Button>
+          <Button onClick={handleWithdraw}>Confirmar Retiro</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

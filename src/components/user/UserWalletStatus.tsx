@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
 import AddMXNB from './AddMXNB'
+import WithdrawMXNB from './WithdrawMXNB'
 
 export default function UserWalletStatus() {
   const { address, hasWallet, isLoading, createWallet } = usePortalWallet()
@@ -30,6 +31,7 @@ export default function UserWalletStatus() {
 
             {/* Agregar MXNB */}
             <AddMXNB />
+            <WithdrawMXNB />
           </>
         ) : (
           <>
