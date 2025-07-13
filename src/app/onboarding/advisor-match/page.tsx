@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import AdvisorCard from '@/components/onboarding/AdvisorCard'
 import ProgressDots from '@/components/onboarding/ProgressDots'
@@ -31,7 +30,7 @@ const advisors: Advisor[] = [
 
 export default function AdvisorMatchPage() {
   const router = useRouter()
-  const [index, setIndex] = useState(0)
+  const index = 0
   const { createWallet } = usePortalWallet()
 
   const handleAccept = async () => {
