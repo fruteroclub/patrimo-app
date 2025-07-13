@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 
 type ActivityItem = {
   date: string
-  type: 'Compra' | 'Venta'
+  type: 'Depósito' | 'Compra' | 'Venta'
   token: string
   amount: string
   status: string
@@ -32,7 +32,6 @@ export default function ActivityLog() {
     },
   ])
 
-  // Recuperar nuevas actividades almacenadas en localStorage
   useEffect(() => {
     const stored = localStorage.getItem('user_activity_log')
     if (stored) {
