@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -14,7 +13,8 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { clients, Client } from '@/lib/clientsMock'
+import { Button } from '@/components/ui/button'
+import { clients } from '@/lib/clientsMock'
 
 export default function Portfolio() {
   const [selectedClient, setSelectedClient] = useState<string | null>(null)
@@ -23,12 +23,17 @@ export default function Portfolio() {
   const [note, setNote] = useState('')
 
   const handleSendSuggestion = () => {
-    console.log('✅ Movimiento sugerido:', {
+    if (!selectedClient) return
+    const newProposal = {
       to: selectedClient,
       amount,
       token,
       note,
-    })
+      status: 'pending',
+      date: new Date().toISOString(),
+    }
+
+    localStorage.setItem('proposal_' + selectedClient, JSON.stringify(newProposal))
     setAmount('')
     setToken('')
     setNote('')
@@ -37,26 +42,27 @@ export default function Portfolio() {
 
   return (
     <div className="grid gap-4">
-      {clients.map((client: Client, index: number) => (
+      {clients.map((client, index) => (
         <Card key={index}>
           <CardHeader>
             <CardTitle>{client.name}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <p>Wallet: {client.address}</p>
-            <p>Monto disponible: {client.currentBalance}</p>
+            <p>Balance: {client.currentBalance}</p>
+            <p>Perfil: {client.riskProfile}</p>
             <Dialog>
               <DialogTrigger asChild>
                 <Button
                   onClick={() => setSelectedClient(client.address)}
                   className="mt-2"
                 >
-                  Sugerir Movimiento
+                  Proponer Movimiento
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Proponer Movimiento</DialogTitle>
+                  <DialogTitle>Movimiento para {client.name}</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid gap-2">
@@ -74,7 +80,7 @@ export default function Portfolio() {
                       id="token"
                       value={token}
                       onChange={(e) => setToken(e.target.value)}
-                      placeholder="Ej. ETH, WBTC..."
+                      placeholder="Ej. ETH, MXNB..."
                     />
                   </div>
                   <div className="grid gap-2">

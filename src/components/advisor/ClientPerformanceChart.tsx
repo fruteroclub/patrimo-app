@@ -68,7 +68,7 @@ export default function ClientPerformanceChart() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Rendimiento de Clientes</CardTitle>
+        <CardTitle>Rendimiento Semanal de Clientes</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={360}>
@@ -78,9 +78,21 @@ export default function ClientPerformanceChart() {
             <YAxis />
             <Tooltip />
             <Legend />
-            <Bar dataKey="clientes" barSize={20} fill="#8884d8" name="Clientes Totales" />
-            <Line type="monotone" dataKey="ganancias" stroke="#82ca9d" strokeWidth={3} name="Ganancias ($)" />
-            <Line type="monotone" dataKey="capital" stroke="#ffc658" strokeWidth={2} name="Capital Bajo Gestión ($)" />
+            <Bar dataKey="clientes" barSize={20} fill="#0ea5e9" name="Clientes Totales" />
+            <Line
+              type="monotone"
+              dataKey="ganancias"
+              stroke="#22c55e"
+              strokeWidth={3}
+              name="Ganancias (MXNB)"
+            />
+            <Line
+              type="monotone"
+              dataKey="capital"
+              stroke="#facc15"
+              strokeWidth={2}
+              name="Capital bajo gestión"
+            />
           </ComposedChart>
         </ResponsiveContainer>
       </CardContent>

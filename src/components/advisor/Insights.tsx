@@ -1,53 +1,51 @@
+// src/components/advisor/Insights.tsx
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { TrendingUp, Users, DollarSign, Activity } from 'lucide-react'
+import { Separator } from '@/components/ui/separator'
+import { Progress } from '@/components/ui/progress'
+
+const insights = [
+  {
+    title: 'Total de Clientes',
+    value: '8',
+    description: 'Clientes bajo tu asesoría activa',
+  },
+  {
+    title: 'Cartera Total Asesorada',
+    value: '$42,800.00 MXNB',
+    description: 'Suma de capital gestionado actualmente',
+  },
+  {
+    title: 'Rendimiento Promedio',
+    value: '+8.4%',
+    description: 'Con base a últimos 30 días',
+    progress: 84,
+  },
+  {
+    title: 'Perfil más común',
+    value: 'Moderado',
+    description: 'Basado en portafolios activos',
+  },
+]
 
 export default function Insights() {
-  const insights = [
-    {
-      title: 'Ganancias Semanales',
-      value: '$1,250.00',
-      change: '+15% respecto a la semana pasada',
-      icon: <TrendingUp className="w-6 h-6 text-green-500" />,
-      badge: 'Estable',
-    },
-    {
-      title: 'Clientes Nuevos',
-      value: '8',
-      change: '3 desde ayer',
-      icon: <Users className="w-6 h-6 text-blue-500" />,
-      badge: 'Crecimiento',
-    },
-    {
-      title: 'Clientes Totales',
-      value: '24',
-      change: 'Activos este mes',
-      icon: <Activity className="w-6 h-6 text-purple-500" />,
-      badge: 'Engagement',
-    },
-    {
-      title: 'Capital Bajo Gestión',
-      value: '$120,400.00',
-      change: '+12% desde el mes pasado',
-      icon: <DollarSign className="w-6 h-6 text-yellow-500" />,
-      badge: 'Ingresos',
-    },
-  ]
-
   return (
-    <div className="grid gap-6 md:grid-cols-2">
-      {insights.map((insight, index) => (
-        <Card key={index}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-lg">{insight.title}</CardTitle>
-            {insight.icon}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {insights.map((insight, i) => (
+        <Card key={i}>
+          <CardHeader>
+            <CardTitle>{insight.title}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-1">
-            <p className="text-2xl font-bold">{insight.value}</p>
-            <p className="text-sm text-muted-foreground">{insight.change}</p>
-            <Badge variant="outline">{insight.badge}</Badge>
+          <CardContent className="space-y-2">
+            <p className="text-2xl font-semibold">{insight.value}</p>
+            <p className="text-muted-foreground text-sm">{insight.description}</p>
+            {insight.progress !== undefined && (
+              <>
+                <Separator />
+                <Progress value={insight.progress} className="h-2 mt-2" />
+              </>
+            )}
           </CardContent>
         </Card>
       ))}

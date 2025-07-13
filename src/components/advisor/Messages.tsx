@@ -25,10 +25,14 @@ export default function Messages() {
     <div className="space-y-4">
       {mockMessages.map((msg, index) => (
         <Card key={index} className="hover:shadow-md transition-all">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
-              <CardTitle className="text-lg">
-                {msg.unread && <Badge variant="destructive" className="mr-2">Nuevo</Badge>}
+              <CardTitle className="text-lg flex items-center">
+                {msg.unread && (
+                  <Badge variant="destructive" className="mr-2">
+                    Nuevo
+                  </Badge>
+                )}
                 {msg.sender}
               </CardTitle>
               <p className="text-sm text-muted-foreground">{msg.date}</p>
@@ -39,7 +43,7 @@ export default function Messages() {
             </Button>
           </CardHeader>
           <CardContent>
-            <p className="text-base leading-relaxed">{msg.text}</p>
+            <p className="text-base">{msg.text}</p>
           </CardContent>
         </Card>
       ))}
