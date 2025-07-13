@@ -6,6 +6,7 @@ import { usePortalWallet } from '@/hooks/usePortalWallet'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Loader2 } from 'lucide-react'
+import AddMXNB from './AddMXNB'
 
 export default function UserWalletStatus() {
   const { address, hasWallet, isLoading, createWallet } = usePortalWallet()
@@ -23,7 +24,12 @@ export default function UserWalletStatus() {
               <br />
               <span className="font-mono text-sm">{address}</span>
             </p>
-            <p className="text-sm text-green-600">Tu wallet está activa y lista para operar.</p>
+            <p className="text-sm text-green-600">
+              Tu wallet está activa y lista para operar.
+            </p>
+
+            {/* Agregar MXNB */}
+            <AddMXNB />
           </>
         ) : (
           <>
