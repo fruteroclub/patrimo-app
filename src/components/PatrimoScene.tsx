@@ -110,8 +110,8 @@ const PatrimoScene = () => {
           left: '42%',
           width: 300,
           height: 300,
-          zIndex: -1,
-          pointerEvents: 'auto',
+          zIndex: 0,
+          pointerEvents: 'none',
           opacity: 0,
           animation: 'fadeInPatrimo 1.8s ease-out forwards',
         }}
