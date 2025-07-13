@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 
 export function usePortfolioData() {
   const [balance, setBalance] = useState(4250) // valor inicial
-  const [percentChange, setPercentChange] = useState(12)
-  const [riskProfile, setRiskProfile] = useState('Moderado')
+  const [percentChange] = useState('+12%')
+  const [riskProfile] = useState('Moderado')
 
   // Simular que el usuario añadió fondos (checar localStorage temporal)
   useEffect(() => {
