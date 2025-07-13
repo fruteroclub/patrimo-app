@@ -1,31 +1,20 @@
 'use client'
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-
-const data = [
-  { name: 'MXNB', risk: 1 },
-  { name: 'USDC', risk: 2 },
-  { name: 'ETH', risk: 4 },
-  { name: 'WBTC', risk: 5 },
-]
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 
 export default function RiskScoreChart() {
+  const risk = 60 // del 0 al 100
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Nivel de riesgo por activo</CardTitle>
+        <CardTitle>Perfil de Riesgo</CardTitle>
       </CardHeader>
-      <CardContent className="h-72">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis domain={[0, 5]} />
-            <Tooltip />
-            <Bar dataKey="risk" fill="#ef4444" />
-          </BarChart>
-        </ResponsiveContainer>
+      <CardContent className="space-y-3">
+        <p>Tu perfil actual es <strong>Moderado</strong>. Puedes ajustar tus preferencias con tu asesor.</p>
+        <Progress value={risk} className="w-full" />
+        <p className="text-sm text-muted-foreground">60% exposición a activos volátiles</p>
       </CardContent>
     </Card>
   )
