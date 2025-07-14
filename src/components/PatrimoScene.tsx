@@ -25,11 +25,9 @@ const PatrimoScene = () => {
     directionalLight.position.set(4, 4, 10)
     scene.add(directionalLight)
 
-    // Geometría con subdivisión
     const geometry = new THREE.DodecahedronGeometry(2.5, 2)
     geometry.computeVertexNormals()
 
-    // Múltiples tonos de verde jade como textura simulada
     const jadeMaterial = new THREE.MeshPhysicalMaterial({
       color: new THREE.Color('#00895e'),
       metalness: 0.3,
@@ -46,7 +44,6 @@ const PatrimoScene = () => {
     const crystal = new THREE.Mesh(geometry, jadeMaterial)
     scene.add(crystal)
 
-    // Wireframe dorado
     const wireframe = new THREE.LineSegments(
       new THREE.WireframeGeometry(geometry),
       new THREE.LineBasicMaterial({
@@ -58,7 +55,6 @@ const PatrimoScene = () => {
     )
     crystal.add(wireframe)
 
-    // Sombra en el fondo
     const shadow = new THREE.Mesh(
       new THREE.CircleGeometry(1.8, 32),
       new THREE.MeshBasicMaterial({
@@ -71,21 +67,19 @@ const PatrimoScene = () => {
     shadow.position.y = -2.7
     scene.add(shadow)
 
-    // Interacción con mouse
     const mouse = { x: 0, y: 0 }
     const handleMouseMove = (e: MouseEvent) => {
       const rect = mount.getBoundingClientRect()
       mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1
       mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1
     }
-    mount.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mousemove', handleMouseMove)
 
     const clock = new THREE.Clock()
     const animate = () => {
       requestAnimationFrame(animate)
       const t = clock.getElapsedTime()
 
-      // rotación base + reactividad mouse
       crystal.rotation.y = t * 0.3 + mouse.x * 0.2
       crystal.rotation.x = Math.sin(t * 0.15) * 0.2 + mouse.y * 0.2
       crystal.position.y = Math.sin(t * 0.9) * 0.12
@@ -95,7 +89,7 @@ const PatrimoScene = () => {
     animate()
 
     return () => {
-      mount.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mousemove', handleMouseMove)
       if (mount.firstChild) mount.removeChild(mount.firstChild)
     }
   }, [])
@@ -105,12 +99,13 @@ const PatrimoScene = () => {
       <div
         ref={mountRef}
         style={{
-          position: 'absolute',
-          bottom: '6rem',
-          left: '42%',
+          position: 'fixed',
+          bottom: '7rem',
+          left: '50%',
+          transform: 'translateX(-50%)',
           width: 300,
           height: 300,
-          zIndex: 0,
+          zIndex: 1,
           pointerEvents: 'none',
           opacity: 0,
           animation: 'fadeInPatrimo 1.8s ease-out forwards',
@@ -120,11 +115,11 @@ const PatrimoScene = () => {
         @keyframes fadeInPatrimo {
           from {
             opacity: 0;
-            transform: scale(0.92);
+            transform: scale(0.92) translateX(-50%);
           }
           to {
             opacity: 1;
-            transform: scale(1);
+            transform: scale(1) translateX(-50%);
           }
         }
       `}</style>
