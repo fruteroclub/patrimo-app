@@ -1,9 +1,13 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, RefObject } from 'react'
 import * as THREE from 'three'
 
-const PatrimoScene = () => {
+interface PatrimoSceneProps {
+  targetRef: RefObject<HTMLElement>
+}
+
+const PatrimoScene = ({ targetRef }: PatrimoSceneProps) => {
   const mountRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -20,7 +24,6 @@ const PatrimoScene = () => {
     mount.appendChild(renderer.domElement)
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.6))
-
     const directionalLight = new THREE.DirectionalLight(0xd4af37, 0.7)
     directionalLight.position.set(4, 4, 10)
     scene.add(directionalLight)
@@ -48,7 +51,6 @@ const PatrimoScene = () => {
       new THREE.WireframeGeometry(geometry),
       new THREE.LineBasicMaterial({
         color: 0xd4af37,
-        linewidth: 1,
         transparent: true,
         opacity: 0.25,
       })
@@ -94,21 +96,41 @@ const PatrimoScene = () => {
     }
   }, [])
 
+  useEffect(() => {
+    const mount = mountRef.current
+    const target = targetRef.current
+    if (!mount || !target) return
+
+    const updatePosition = () => {
+      const rect = target.getBoundingClientRect()
+      mount.style.position = 'absolute'
+      mount.style.left = `${rect.left + rect.width / 2}px`
+      mount.style.top = `${rect.bottom + 16}px` // debajo del botón
+      mount.style.transform = 'translateX(-50%)'
+    }
+
+    updatePosition()
+    window.addEventListener('resize', updatePosition)
+    window.addEventListener('scroll', updatePosition)
+
+    return () => {
+      window.removeEventListener('resize', updatePosition)
+      window.removeEventListener('scroll', updatePosition)
+    }
+  }, [targetRef])
+
   return (
     <>
       <div
         ref={mountRef}
         style={{
-          position: 'fixed',
-          bottom: '7rem',
-          left: '50%',
-          transform: 'translateX(-50%)',
           width: 300,
           height: 300,
           zIndex: 1,
           pointerEvents: 'none',
           opacity: 0,
           animation: 'fadeInPatrimo 1.8s ease-out forwards',
+          position: 'absolute',
         }}
       />
       <style jsx global>{`

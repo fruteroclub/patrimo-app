@@ -1,96 +1,74 @@
-# poktapok - aplicación para builders de frutero club
+# 🟢 Patrimo — Your On-Chain Wealth Advisor
 
-poktapok es un tercer espacio digital creado especialmente para los builders de frutero club. esta plataforma está diseñada para fomentar el crecimiento colectivo de nuestra comunidad, permitiendo:
+[▶️ Watch Demo](https://youtu.be/V0GsJ7MxPTY)
 
-- compartir conocimientos y experiencias
-- desarrollar nuevas habilidades
-- explorar tendencias emergentes
-- descubrir oportunidades de colaboración
+---
 
-nuestra visión es crear un ecosistema vibrante donde los builders puedan conectar, aprender y crecer juntos.
+## 🚀 Why — What's the problem?
 
-## características
+Crypto users often lack guidance. Financial advisors exist, but their suggestions don’t translate easily into self-custodied execution.
 
-- **Next.js** con App Router para una estructura y enrutamiento óptimos.
-- **Shadcn** para componentes de UI bien diseñados y reutilizables.
-- **Bun** como runtime para builds más rápidas y mejor rendimiento.
-- pre-configurado para **Dynamic Wallet** (impulsado por [dynamic.xyz](https://dynamic.xyz)) para manejar la creación y conexión de wallets.
+**Patrimo bridges that gap**, connecting users with trusted advisors who can suggest portfolio moves — while the user retains full custody.
 
-## primeros pasos
+---
 
-### requisitos Previos
+## ⚙️ How — How does it work?
 
-- [Node.js](https://nodejs.org/) (asegúrate de tener Bun instalado como runtime)
-- [Bun](https://bun.sh/docs/installation)
-- [Git](https://git-scm.com/)
+1. User signs up with **PortalHQ** — gets a wallet they control.
+2. Browses available advisors and picks one.
+3. Advisor proposes portfolio changes (e.g., "Buy ETH with MXNB").
+4. User **accepts or rejects** each proposal — transactions are signed by the user only.
 
-### instalación
+---
 
-1. **clona el repositorio:**
+## 👥 Who — Who is it for?
 
-   ```bash
-   git clone https://github.com/fruteroclub/poktapok.git
-   cd poktapok
-   ```
+- **Crypto users** who want guidance without giving up custody.
+- **Financial advisors** offering smart crypto portfolio strategies.
 
-2. **instala las dependencias usando Bun:**
+---
 
-   ```bash
-   bun install
-   ```
+## 🎯 Built For — Hackathon Tracks
 
-3. **configura las variables de entorno:**
+| Track              | Integration Highlights                                                |
+|-------------------|------------------------------------------------------------------------|
+| ✅ Payments        | Uses **MXNB** (Mexican stablecoin) for transfers and purchases         |
+| ✅ DeFi            | Users can accept proposals and execute swaps between assets            |
+| ✅ General / Open  | Fully functional on-chain fintech with real UX and visual polish       |
 
-   crea un archivo `.env` en la raíz de tu proyecto y añade las siguientes variables:
+---
 
-   ```plaintext
-   NEXT_PUBLIC_DYNAMIC_API_KEY=tu_dynamic_api_key
-   ```
+## 🧩 Tech Stack
 
-   reemplaza `tu_dynamic_api_key` con tu clave API de [dynamic.xyz](https://dynamic.xyz).
+| Tech         | Purpose                                                                  |
+|--------------|--------------------------------------------------------------------------|
+| **PortalHQ** | User onboarding, wallet creation, transaction signing                    |
+| **Next.js**  | Web app frontend                                                         |
+| **Tailwind** | Responsive UI design                                                     |
+| **Recharts** | Portfolio insights and data visualization                                |
+| **Juno (WIP)** | Planned for backend transaction automation (commented in `AdvisorActions.tsx`) |
+|       |
 
-### ejecutando el proyecto
+---
 
-para iniciar el servidor de desarrollo, ejecuta:
+## 🔐 About MXNB & Arbitrum
 
-```bash
-bun run dev
-```
+- **MXNB**: Stablecoin used to simulate purchasing crypto assets.
+- **Arbitrum**: L2 chain powering all on-chain transactions — low fees, fast finality.
 
-esto lanzará la aplicación en `http://localhost:3000`.
+---
 
-### build y producción
+## 📝 Key Code Notes
 
-para builds de producción, utiliza:
+- 🔑 **Portal integration** → in `hooks/usePortalWallet.ts` and layout components.
+- 🧠 **Juno pre-integration** → code commented in `components/advisor/AddMXNB.tsx` and `components/advisor/WithdrawMXNB.tsx`.
 
-```bash
-bun run build
-bun run start
-```
 
-## estructura del proyecto
+---
 
-```plaintext
-.
-├── public/          # archivos estáticos
-├── src/app/         # páginas y rutas de Next.js
-├── src/components/  # componentes React personalizados
-├── src/styles/      # hojas de estilo globales
-├── .env             # variables de entorno
-├── ...              # ¡otros archivos de configuración, revisa el repo!
-```
+## 🫡 Built with ❤️ at the Bitso MXNB  Hackathon
 
-## integración de Wallet
-
-la plantilla inicial incluye integración con **Dynamic Wallet**, permitiendo una creación y conexión fluida de wallets para los usuarios:
-
-- **Dynamic.xyz** proporciona una interfaz de usuario fácil de usar para la conexión de wallets.
-- donfiguración plug-and-play para conectar con cadenas compatibles con EVM.
-
-## Contribuciones
-
-¡damos la bienvenida a las contribuciones! siéntete libre de enviar issues o pull requests para ayudar a mejorar este proyecto para el club y la comunidad.
-
-## Licencia
-
-este proyecto es de código abierto y está disponible bajo la [Licencia MIT](LICENSE).
+by:
+– [ Julio Flores ](https://x.com/Julioafs)
+– [ Ángel Melendez ](https://x.com/troopdegen)
+– [ Valentín Martínez ](https://x.com/ValeCreativo)
