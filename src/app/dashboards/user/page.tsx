@@ -17,6 +17,7 @@ import UserWalletStatus from '@/components/user/UserWalletStatus'
 import ActivityLog from '@/components/user/ActivityLog'
 import { Button } from '@/components/ui/button'
 import { PortfolioProvider } from '@/context/PortfolioContext'
+import TokenStatsTable from '@/components/user/TokenStatsTable'
 
 export default function UserDashboard() {
   return (
@@ -55,6 +56,7 @@ export default function UserDashboard() {
           </TabsContent>
           <TabsContent value="allocation">
             <AllocationChart />
+            <TokenStatsTable />
           </TabsContent>
           <TabsContent value="activity">
             <ActivityLog />
