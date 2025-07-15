@@ -13,7 +13,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { usePortfolioContext } from '@/context/PortfolioContext'
-// import { Juno } from '@juno/onramp' // Descomentar cuando esté disponible
 
 export default function AddMXNB() {
   const [open, setOpen] = useState(false)
@@ -21,52 +20,76 @@ export default function AddMXNB() {
   const { updateBalance } = usePortfolioContext()
   const JUNO_API_KEY = process.env.NEXT_PUBLIC_JUNO_API_KEY
 
-  const handleAdd = () => {
+  const getClabe = async () => {
+    const res = await fetch('https://stage.buildwithjuno.com/spei/v1/clabes?clabe_type=AUTO_PAYMENT', {
+      headers: {
+        Authorization: `Bearer ${JUNO_API_KEY}`,
+      },
+    })
+    const data = await res.json()
+    return data.payload.response[0]?.clabe
+  }
+
+  const handleAdd = async () => {
     const value = parseFloat(amount)
-    if (isNaN(value) || value <= 0) {
-      toast.error('Cantidad inválida')
+    if (isNaN(value) || value < 100) {
+      toast.error('La cantidad mínima es 100 MXN')
       return
     }
 
     if (!JUNO_API_KEY) {
-      // Mock fallback mientras no se tenga acceso real
-      updateBalance(value)
-      const newEntry = {
-        date: new Date().toISOString().slice(0, 10),
-        type: 'Depósito',
-        token: 'MXNB',
-        amount: `${value} MXNB`,
-        status: 'Acreditado',
-        pnl: '+0%',
-      }
-      const stored = localStorage.getItem('user_activity_log')
-      const prev = stored ? JSON.parse(stored) : []
-      localStorage.setItem('user_activity_log', JSON.stringify([newEntry, ...prev]))
-
-      toast.success(`Añadidos ${value} MXNB con éxito`)
-      setAmount('')
-      setOpen(false)
+      toast.error('No se encontró la API key de Juno')
       return
     }
 
-    // ✅ Integración real Juno — Descomenta cuando tengas el API KEY
-    /*
-    const juno = new Juno(JUNO_API_KEY)
-    juno.showWidget({
-      defaultFiatAmount: value,
-      defaultFiatCurrency: 'MXN',
-      defaultNetwork: 'arbitrum-sepolia',
-      defaultPaymentMethod: 'card',
-      walletAddress: '0x...REEMPLAZA...', // <- remplaza con address de Portal
-      onSuccess: () => {
+    try {
+      const clabe = await getClabe()
+      if (!clabe) {
+        toast.error('No se pudo obtener la CLABE de Juno')
+        return
+      }
+
+      const res = await fetch('https://stage.buildwithjuno.com/spei/test/deposits', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${JUNO_API_KEY}`,
+        },
+        body: JSON.stringify({
+          amount: value.toString(),
+          receiver_clabe: clabe,
+          receiver_name: 'Patrimo',
+          sender_name: 'Patrimo',
+          sender_clabe: '123456789012345678',
+        }),
+      })
+
+      const data = await res.json()
+
+      if (data.success) {
         updateBalance(value)
-        toast.success(`MXNB añadido exitosamente`)
+        const newEntry = {
+          date: new Date().toISOString().slice(0, 10),
+          type: 'Depósito',
+          token: 'MXNB',
+          amount: `${value} MXNB`,
+          status: 'Acreditado',
+          pnl: '+0%',
+        }
+        const stored = localStorage.getItem('user_activity_log')
+        const prev = stored ? JSON.parse(stored) : []
+        localStorage.setItem('user_activity_log', JSON.stringify([newEntry, ...prev]))
+
+        toast.success(`Mock depósito de ${value} MXNB realizado con éxito`)
         setAmount('')
         setOpen(false)
-      },
-      onExit: () => toast.info('Operación cancelada'),
-    })
-    */
+      } else {
+        toast.error('Falló el depósito simulado')
+      }
+    } catch (error) {
+      toast.error('Error al conectar con Juno')
+      console.error(error)
+    }
   }
 
   return (
@@ -78,14 +101,18 @@ export default function AddMXNB() {
         <DialogHeader>
           <DialogTitle>¿Cuánto MXNB deseas agregar?</DialogTitle>
         </DialogHeader>
+
         <Input
           type="number"
           placeholder="Ej. 500"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
         />
-        <DialogFooter>
-          <Button onClick={handleAdd}>Confirmar Depósito</Button>
+
+        <DialogFooter className="pt-4">
+          <Button onClick={handleAdd} className="w-full">
+            Simular Depósito con Juno
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
