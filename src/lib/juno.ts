@@ -8,19 +8,16 @@ const headers = {
   'Content-Type': 'application/json',
 }
 
-// Tipo para el balance
 interface BalanceItem {
   asset: string
   balance: number
 }
 
-// Tipo para el depósito simulado
-interface MockDepositResponse {
+interface MockDepositResponse extends Record<string, unknown> {
   transaction_id: string
   status: string
   amount: number
   created_at?: string
-  [key: string]: any
 }
 
 export const getAutoPaymentClabe = async (): Promise<string> => {
