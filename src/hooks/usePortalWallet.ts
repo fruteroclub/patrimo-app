@@ -6,6 +6,16 @@ export function usePortalWallet() {
   const [isLoading, setLoading] = useState(false)
   const [hasWallet, setHasWallet] = useState(false)
 
+  const waitForMPCReady = async (portal: any) => {
+    let tries = 0
+    while (!(await portal.isMPCReady())) {
+      if (tries > 20) throw new Error('⚠️ MPC no se inicializó a tiempo')
+      console.log('⌛ Esperando a que MPC esté listo...')
+      await new Promise((res) => setTimeout(res, 300))
+      tries++
+    }
+  }
+
   const createWallet = async () => {
     setLoading(true)
     try {
@@ -23,6 +33,9 @@ export function usePortalWallet() {
       if (!portal) throw new Error('❌ Portal SDK no inicializado')
 
       console.log('🛠️ Iniciando creación de wallet con token:', clientSessionToken)
+
+      await waitForMPCReady(portal)
+
       const addr = await portal.createWallet()
       console.log('✅ Wallet creada:', addr)
 
