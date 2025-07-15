@@ -1,24 +1,31 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import { getPortal } from '@/lib/portal'
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const ARBITRUM_SEPOLIA = 'eip155:421614'
 
 export function usePortalWallet() {
   const [address, setAddress] = useState<string | null>(null)
   const [isLoading, setLoading] = useState(false)
   const [hasWallet, setHasWallet] = useState(false)
 
-  const portal = typeof window !== 'undefined' ? getPortal() : null
-
   const createWallet = async () => {
-    if (!portal) return
-
     setLoading(true)
     try {
+      const res = await fetch('/api/create-portal-client', { method: 'POST' })
+      const { clientSessionToken, clientId } = await res.json()
+
+      if (!clientSessionToken || !clientId) {
+        throw new Error('❌ Portal no devolvió token o clientId')
+      }
+
+      localStorage.setItem('portal_token', clientSessionToken)
+      localStorage.setItem('portal_client_id', clientId)
+
+      const portal = getPortal(clientSessionToken)
+      if (!portal) throw new Error('❌ Portal SDK no inicializado')
+
+      console.log('🛠️ Iniciando creación de wallet con token:', clientSessionToken)
       const addr = await portal.createWallet()
+      console.log('✅ Wallet creada:', addr)
+
       localStorage.setItem('portal_address', addr)
       setAddress(addr)
       setHasWallet(true)
@@ -31,7 +38,9 @@ export function usePortalWallet() {
 
   useEffect(() => {
     const saved = localStorage.getItem('portal_address')
-    if (saved) {
+    const token = localStorage.getItem('portal_token')
+
+    if (saved && token) {
       setAddress(saved)
       setHasWallet(true)
     }
