@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { getPortal } from '@/lib/portal'
-import Portal from '@portal-hq/web'
 
 export function usePortalWallet() {
   const [address, setAddress] = useState<string | null>(null)
