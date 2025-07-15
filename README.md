@@ -1,6 +1,7 @@
 # 🟢 Patrimo — Your On-Chain Wealth Advisor
 
 [▶️ Watch Demo](https://youtu.be/V0GsJ7MxPTY)
+[📝 Smart Contracts](https://github.com/fruteroclub/patrimo-contracts)
 
 ---
 
@@ -30,24 +31,24 @@ Crypto users often lack guidance. Financial advisors exist, but their suggestion
 
 ## 🎯 Built For — Hackathon Tracks
 
-| Track              | Integration Highlights                                                |
-|-------------------|------------------------------------------------------------------------|
-| ✅ Payments        | Uses **MXNB** (Mexican stablecoin) for transfers and purchases         |
-| ✅ DeFi            | Users can accept proposals and execute swaps between assets            |
-| ✅ General / Open  | Fully functional on-chain fintech with real UX and visual polish       |
+| Track             | Integration Highlights                                           |
+| ----------------- | ---------------------------------------------------------------- |
+| ✅ Payments       | Uses **MXNB** (Mexican stablecoin) for transfers and purchases   |
+| ✅ DeFi           | Users can accept proposals and execute swaps between assets      |
+| ✅ General / Open | Fully functional on-chain fintech with real UX and visual polish |
 
 ---
 
 ## 🧩 Tech Stack
 
-| Tech         | Purpose                                                                  |
-|--------------|--------------------------------------------------------------------------|
-| **PortalHQ** | User onboarding, wallet creation, transaction signing                    |
-| **Next.js**  | Web app frontend                                                         |
-| **Tailwind** | Responsive UI design                                                     |
-| **Recharts** | Portfolio insights and data visualization                                |
+| Tech           | Purpose                                                                        |
+| -------------- | ------------------------------------------------------------------------------ |
+| **PortalHQ**   | User onboarding, wallet creation, transaction signing                          |
+| **Next.js**    | Web app frontend                                                               |
+| **Tailwind**   | Responsive UI design                                                           |
+| **Recharts**   | Portfolio insights and data visualization                                      |
 | **Juno (WIP)** | Planned for backend transaction automation (commented in `AdvisorActions.tsx`) |
-|       |
+|                |
 
 ---
 
@@ -63,10 +64,9 @@ Crypto users often lack guidance. Financial advisors exist, but their suggestion
 - 🔑 **Portal integration** → in `hooks/usePortalWallet.ts` and layout components.
 - 🧠 **Juno pre-integration** → code commented in `components/advisor/AddMXNB.tsx` and `components/advisor/WithdrawMXNB.tsx`.
 
-
 ---
 
-## 🫡 Built with ❤️ at the Bitso MXNB  Hackathon
+## 🫡 Built with ❤️ at the Bitso MXNB Hackathon
 
 by:
 – [ Julio Flores ](https://x.com/Julioafs)

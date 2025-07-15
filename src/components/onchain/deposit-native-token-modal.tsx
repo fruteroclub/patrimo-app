@@ -4,6 +4,7 @@ import {
   useContractRead,
   useWriteContract,
   useWaitForTransactionReceipt,
+  useSendTransaction,
 } from 'wagmi'
 import { formatEther, parseEther } from 'viem'
 import {
@@ -119,7 +120,11 @@ export default function DepositNativeTokenModal({
   })
 
   // Contract write hooks
-  const { writeContract, data: hash, isPending } = useWriteContract()
+  const { writeContract, data: contractHash, isPending: contractPending } = useWriteContract()
+  const { sendTransaction, data: txHash, isPending: txPending } = useSendTransaction()
+
+  const hash = contractHash || txHash
+  const isPending = contractPending || txPending
 
   // Wait for transaction
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
@@ -176,11 +181,8 @@ export default function DepositNativeTokenModal({
     }
 
     const ethValue = parseEther(depositAmount)
-    writeContract({
-      address: portfolioAddress,
-      abi: PORTFOLIO_MANAGER_ABI,
-      functionName: 'deposit',
-      args: ['0x0000000000000000000000000000000000000000', ethValue],
+    sendTransaction({
+      to: portfolioAddress,
       value: ethValue,
     })
   }
