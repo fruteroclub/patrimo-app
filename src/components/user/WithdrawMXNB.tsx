@@ -13,6 +13,13 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 
+interface JunoRedeemResponse {
+  success: boolean
+  error?: {
+    message: string
+  }
+}
+
 export default function WithdrawMXNB() {
   const [cantidad, setCantidad] = useState('')
   const [cargando, setCargando] = useState(false)
@@ -35,17 +42,18 @@ export default function WithdrawMXNB() {
         }),
       })
 
-      const data = await res.json()
+      const data: JunoRedeemResponse = await res.json()
 
       if (!res.ok || !data.success) {
-        throw new Error(data.error?.message || 'Ocurrió un error al retirar')
+        throw new Error(data.error?.message || 'Error withdrawing MXNB')
       }
 
       setExito(true)
       setCantidad('')
-    } catch (err: any) {
-      console.error('[ERROR DE RETIRO]', err)
-      setError(err.message || 'Error inesperado')
+    } catch (err) {
+      const e = err as Error
+      console.error('[WITHDRAW ERROR]', e)
+      setError(e.message || 'Unexpected error')
     } finally {
       setCargando(false)
     }
@@ -54,14 +62,14 @@ export default function WithdrawMXNB() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-      <Button variant="outline" className="text-sm py-2 h-9">🏧 Retirar MXNB</Button>
+        <Button variant="outline" className="text-sm py-2 h-9">🏧 Withdraw MXNB</Button>
       </DialogTrigger>
 
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>¿Cuánto MXNB deseas retirar?</DialogTitle>
+          <DialogTitle>How much MXNB would you like to withdraw?</DialogTitle>
           <DialogDescription className="sr-only">
-            Ingresa la cantidad de MXNB a retirar de tu saldo.
+            Enter the amount of MXNB to withdraw from your balance.
           </DialogDescription>
         </DialogHeader>
 
@@ -73,7 +81,7 @@ export default function WithdrawMXNB() {
         />
 
         {exito && (
-          <p className="text-sm text-green-600">¡Retiro exitoso!</p>
+          <p className="text-sm text-green-600">Withdrawal successful!</p>
         )}
         {error && (
           <p className="text-sm text-red-600">Error: {error}</p>
@@ -81,7 +89,7 @@ export default function WithdrawMXNB() {
 
         <DialogFooter>
           <Button onClick={manejarRetiro} disabled={cargando || !cantidad}>
-            {cargando ? 'Retirando...' : 'Confirmar'}
+            {cargando ? 'Withdrawing...' : 'Confirm'}
           </Button>
         </DialogFooter>
       </DialogContent>

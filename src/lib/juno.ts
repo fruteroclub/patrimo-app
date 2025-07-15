@@ -1,4 +1,3 @@
-// lib/juno.ts
 import axios from 'axios'
 
 const JUNO_API = 'https://stage.buildwithjuno.com'
@@ -9,7 +8,7 @@ const headers = {
   'Content-Type': 'application/json',
 }
 
-export const getAutoPaymentClabe = async () => {
+export const getAutoPaymentClabe = async (): Promise<string> => {
   const res = await axios.get(`${JUNO_API}/spei/v1/clabes?clabe_type=AUTO_PAYMENT`, { headers })
   return res.data.payload.response[0].clabe
 }
@@ -26,7 +25,7 @@ export const createMockDeposit = async ({
   receiver_name: string
   sender_name: string
   sender_clabe: string
-}) => {
+}): Promise<any> => {
   const res = await axios.post(
     `${JUNO_API}/spei/test/deposits`,
     {
@@ -41,8 +40,14 @@ export const createMockDeposit = async ({
   return res.data.payload
 }
 
-export const getMXNBBalance = async () => {
+interface BalanceItem {
+  asset: string
+  balance: number
+}
+
+export const getMXNBBalance = async (): Promise<number> => {
   const res = await axios.get(`${JUNO_API}/mint_platform/v1/balances`, { headers })
-  const mxnb = res.data.payload.balances.find((b: any) => b.asset === 'mxnbj')
+  const balances: BalanceItem[] = res.data.payload.balances
+  const mxnb = balances.find((b) => b.asset === 'mxnbj')
   return mxnb?.balance || 0
 }
