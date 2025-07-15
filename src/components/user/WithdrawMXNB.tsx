@@ -1,91 +1,96 @@
 'use client'
 
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   Dialog,
   DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { toast } from 'sonner'
-import { usePortfolioContext } from '@/context/PortfolioContext'
-// import { Juno } from '@juno/onramp' // Descomenta cuando se use off-ramp real
+
+interface JunoRedeemResponse {
+  success: boolean
+  error?: {
+    message: string
+  }
+}
 
 export default function WithdrawMXNB() {
-  const [open, setOpen] = useState(false)
-  const [amount, setAmount] = useState('')
-  const { updateBalance } = usePortfolioContext()
-  const JUNO_API_KEY = process.env.NEXT_PUBLIC_JUNO_API_KEY
+  const [cantidad, setCantidad] = useState('')
+  const [cargando, setCargando] = useState(false)
+  const [exito, setExito] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleWithdraw = () => {
-    const value = parseFloat(amount)
-    if (isNaN(value) || value <= 0) {
-      toast.error('Cantidad inválida')
-      return
-    }
+  const manejarRetiro = async () => {
+    setCargando(true)
+    setExito(false)
+    setError(null)
 
-    if (!JUNO_API_KEY) {
-      // Simulación sin integración
-      updateBalance(-value)
-      const newEntry = {
-        date: new Date().toISOString().slice(0, 10),
-        type: 'Retiro',
-        token: 'MXNB',
-        amount: `${value} MXNB`,
-        status: 'Procesado',
-        pnl: '+0%',
+    try {
+      const res = await fetch('/api/juno/redeem', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: Number(cantidad),
+        }),
+      })
+
+      const data: JunoRedeemResponse = await res.json()
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error?.message || 'Error withdrawing MXNB')
       }
-      const stored = localStorage.getItem('user_activity_log')
-      const prev = stored ? JSON.parse(stored) : []
-      localStorage.setItem('user_activity_log', JSON.stringify([newEntry, ...prev]))
 
-      toast.success(`Retirados ${value} MXNB`)
-      setAmount('')
-      setOpen(false)
-      return
+      setExito(true)
+      setCantidad('')
+    } catch (err) {
+      const e = err as Error
+      console.error('[WITHDRAW ERROR]', e)
+      setError(e.message || 'Unexpected error')
+    } finally {
+      setCargando(false)
     }
-
-    // ✅ Integración real con Juno (off-ramp) — lista para habilitar
-    /*
-    const juno = new Juno(JUNO_API_KEY)
-    juno.showWidget({
-      defaultCryptoAmount: value,
-      defaultFiatCurrency: 'MXN',
-      defaultNetwork: 'arbitrum-sepolia',
-      defaultPaymentMethod: 'bank',
-      walletAddress: '0x...REEMPLAZA...', // <- tu wallet Portal
-      onSuccess: () => {
-        updateBalance(-value)
-        toast.success(`MXNB retirados exitosamente`)
-        setAmount('')
-        setOpen(false)
-      },
-      onExit: () => toast.info('Operación cancelada'),
-    })
-    */
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full">🏧 Retirar MXNB</Button>
+        <Button variant="outline" className="text-sm py-2 h-9">🏧 Withdraw MXNB</Button>
       </DialogTrigger>
+
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>¿Cuánto MXNB deseas retirar?</DialogTitle>
+          <DialogTitle>How much MXNB would you like to withdraw?</DialogTitle>
+          <DialogDescription className="sr-only">
+            Enter the amount of MXNB to withdraw from your balance.
+          </DialogDescription>
         </DialogHeader>
+
         <Input
           type="number"
-          placeholder="Ej. 300"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+          placeholder="100.00"
+          value={cantidad}
+          onChange={(e) => setCantidad(e.target.value)}
         />
+
+        {exito && (
+          <p className="text-sm text-green-600">Withdrawal successful!</p>
+        )}
+        {error && (
+          <p className="text-sm text-red-600">Error: {error}</p>
+        )}
+
         <DialogFooter>
-          <Button onClick={handleWithdraw}>Confirmar Retiro</Button>
+          <Button onClick={manejarRetiro} disabled={cargando || !cantidad}>
+            {cargando ? 'Withdrawing...' : 'Confirm'}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

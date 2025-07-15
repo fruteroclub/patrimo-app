@@ -1,91 +1,94 @@
 'use client'
 
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   Dialog,
   DialogTrigger,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { toast } from 'sonner'
 import { usePortfolioContext } from '@/context/PortfolioContext'
-// import { Juno } from '@juno/onramp' // Descomentar cuando esté disponible
+import { simulateDeposit } from '@/lib/simulateDeposit'
 
 export default function AddMXNB() {
-  const [open, setOpen] = useState(false)
-  const [amount, setAmount] = useState('')
+  const [cantidad, setCantidad] = useState('')
+  const [cargando, setCargando] = useState(false)
+  const [exito, setExito] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const { updateBalance } = usePortfolioContext()
-  const JUNO_API_KEY = process.env.NEXT_PUBLIC_JUNO_API_KEY
 
-  const handleAdd = () => {
-    const value = parseFloat(amount)
-    if (isNaN(value) || value <= 0) {
-      toast.error('Cantidad inválida')
+  const manejarDeposito = async () => {
+    const valor = parseFloat(cantidad)
+    if (isNaN(valor) || valor <= 0) {
+      setError('Cantidad inválida')
       return
     }
 
-    if (!JUNO_API_KEY) {
-      // Mock fallback mientras no se tenga acceso real
-      updateBalance(value)
-      const newEntry = {
+    setCargando(true)
+    setExito(false)
+    setError(null)
+
+    try {
+      await simulateDeposit(valor)
+
+      updateBalance(valor)
+
+      const nuevoRegistro = {
         date: new Date().toISOString().slice(0, 10),
         type: 'Depósito',
         token: 'MXNB',
-        amount: `${value} MXNB`,
-        status: 'Acreditado',
+        amount: `${valor} MXNB`,
+        status: 'Simulado',
         pnl: '+0%',
       }
-      const stored = localStorage.getItem('user_activity_log')
-      const prev = stored ? JSON.parse(stored) : []
-      localStorage.setItem('user_activity_log', JSON.stringify([newEntry, ...prev]))
 
-      toast.success(`Añadidos ${value} MXNB con éxito`)
-      setAmount('')
-      setOpen(false)
-      return
+      const almacenado = localStorage.getItem('user_activity_log')
+      const previo = almacenado ? JSON.parse(almacenado) : []
+      localStorage.setItem('user_activity_log', JSON.stringify([nuevoRegistro, ...previo]))
+
+      setExito(true)
+      setCantidad('')
+    } catch (err) {
+      console.error('[ERROR DE DEPÓSITO]', err)
+      setError('No se pudo simular el depósito')
+    } finally {
+      setCargando(false)
     }
-
-    // ✅ Integración real Juno — Descomenta cuando tengas el API KEY
-    /*
-    const juno = new Juno(JUNO_API_KEY)
-    juno.showWidget({
-      defaultFiatAmount: value,
-      defaultFiatCurrency: 'MXN',
-      defaultNetwork: 'arbitrum-sepolia',
-      defaultPaymentMethod: 'card',
-      walletAddress: '0x...REEMPLAZA...', // <- remplaza con address de Portal
-      onSuccess: () => {
-        updateBalance(value)
-        toast.success(`MXNB añadido exitosamente`)
-        setAmount('')
-        setOpen(false)
-      },
-      onExit: () => toast.info('Operación cancelada'),
-    })
-    */
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog>
       <DialogTrigger asChild>
-        <Button className="w-full">💰 Agregar MXNB</Button>
-      </DialogTrigger>
+      <Button className="text-sm py-2 h-9">💰 Agregar MXNB</Button>
+</DialogTrigger>
+
       <DialogContent>
         <DialogHeader>
           <DialogTitle>¿Cuánto MXNB deseas agregar?</DialogTitle>
+          <DialogDescription className="sr-only">
+            Ingresa la cantidad que deseas añadir a tu portafolio en MXNB.
+          </DialogDescription>
         </DialogHeader>
+
         <Input
           type="number"
           placeholder="Ej. 500"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+          value={cantidad}
+          onChange={(e) => setCantidad(e.target.value)}
         />
+
+        {exito && <p className="text-sm text-green-600">¡Depósito simulado con éxito!</p>}
+        {error && <p className="text-sm text-red-600">Error: {error}</p>}
+
         <DialogFooter>
-          <Button onClick={handleAdd}>Confirmar Depósito</Button>
+          <Button onClick={manejarDeposito} disabled={cargando || !cantidad}>
+            {cargando ? 'Agregando...' : 'Confirmar Depósito'}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
