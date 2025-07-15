@@ -1,27 +1,11 @@
 import { useState, useEffect } from 'react'
-import Portal from '@portal-hq/web'
 import { getPortal } from '@/lib/portal'
+import Portal from '@portal-hq/web'
 
 export function usePortalWallet() {
   const [address, setAddress] = useState<string | null>(null)
   const [isLoading, setLoading] = useState(false)
   const [hasWallet, setHasWallet] = useState(false)
-
-  const waitForMPCReady = async (portal: Portal) => {
-    let tries = 0
-
-    // Type assertion: usamos el método aunque no esté declarado en el tipo oficial
-    const safePortal = portal as Portal & {
-      isMPCReady: () => Promise<boolean>
-    }
-
-    while (!(await safePortal.isMPCReady())) {
-      if (tries > 20) throw new Error('⚠️ MPC no se inicializó a tiempo')
-      console.log('⌛ Esperando a que MPC esté listo...')
-      await new Promise((res) => setTimeout(res, 300))
-      tries++
-    }
-  }
 
   const createWallet = async () => {
     setLoading(true)
@@ -40,8 +24,6 @@ export function usePortalWallet() {
       if (!portal) throw new Error('❌ Portal SDK no inicializado')
 
       console.log('🛠️ Iniciando creación de wallet con token:', clientSessionToken)
-
-      await waitForMPCReady(portal)
 
       const addr = await portal.createWallet()
       console.log('✅ Wallet creada:', addr)
