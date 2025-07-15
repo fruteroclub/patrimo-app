@@ -3,12 +3,13 @@
 import Link from 'next/link'
 import { useRef } from 'react'
 import PatrimoScene from '@/components/PatrimoScene'
+import PageWrapper from '@/components/layout/page-wrapper'
 
 export default function Landing() {
   const buttonRef = useRef<HTMLButtonElement>(null)
 
   return (
-    <>
+    <PageWrapper>
       {/* Cast para que encaje con targetRef: HTMLElement */}
       <PatrimoScene targetRef={buttonRef as React.RefObject<HTMLElement>} />
 
@@ -40,6 +41,6 @@ export default function Landing() {
           </div>
         </div>
       </section>
-    </>
+    </PageWrapper>
   )
 }

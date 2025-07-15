@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import '@/styles/globals.css'
 import { Toaster } from '@/components/ui/sonner'
 import { fonts } from '@/lib/fonts'
+import OnchainProvider from '@/providers/onchain-provider'
 
 export const metadata: Metadata = {
   title: 'Patrimo',
@@ -25,8 +26,10 @@ export default function RootLayout({
           fonts.spaceGrotesk.variable,
         )}
       >
-        {children}
-        <Toaster richColors />
+        <OnchainProvider>
+          {children}
+          <Toaster richColors />
+        </OnchainProvider>
       </body>
     </html>
   )
