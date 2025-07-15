@@ -1,25 +1,78 @@
-// src/components/user/UserWalletStatus.tsx
+// src/components/user/PortfolioManagerStatus.tsx
 
 'use client'
 
-import { useAccount, useBalance } from 'wagmi'
+import { useAccount, useContractRead } from 'wagmi'
 import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Copy, QrCode } from 'lucide-react'
-import { truncateString } from '@/utils'
+import { TrendingUp, PieChart, Wallet } from 'lucide-react'
+import { formatUnits } from 'viem'
 import { useDynamicContext } from '@dynamic-labs/sdk-react-core'
-import { toast } from 'sonner'
-import AddMXNB from './AddMXNB'
-import WithdrawMXNB from './WithdrawMXNB'
 
-export default function UserWalletStatus() {
+// Contract ABIs (simplified)
+const PATRIMO_FACTORY_ABI = [
+  {
+    "inputs": [{ "name": "_investor", "type": "address" }],
+    "name": "getInvestorPortfolios",
+    "outputs": [{ "name": "", "type": "address[]" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+] as const
+
+const ATOKEN_MANAGER_ABI = [
+  {
+    "inputs": [{ "name": "user", "type": "address" }, { "name": "asset", "type": "address" }],
+    "name": "getBalance",
+    "outputs": [{ "name": "", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [{ "name": "user", "type": "address" }],
+    "name": "getUserPositions",
+    "outputs": [{ "name": "", "type": "uint256[]" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+] as const
+
+// Contract addresses (these should be environment variables)
+const PATRIMO_FACTORY_ADDRESS = process.env.NEXT_PUBLIC_PATRIMO_FACTORY_ADDRESS as `0x${string}`
+const ATOKEN_MANAGER_ADDRESS = process.env.NEXT_PUBLIC_ATOKEN_MANAGER_ADDRESS as `0x${string}`
+const MXNB_ADDRESS = process.env.NEXT_PUBLIC_MXNB_ADDRESS as `0x${string}`
+
+export default function PortfolioManagerStatus() {
   const [isMounted, setIsMounted] = useState(false)
   const { sdkHasLoaded } = useDynamicContext()
   const { address, status } = useAccount()
 
-  const accountBalance = useBalance({
-    address,
+  // Get user's portfolios from factory
+  const { data: portfolios } = useContractRead({
+    address: PATRIMO_FACTORY_ADDRESS,
+    abi: PATRIMO_FACTORY_ABI,
+    functionName: 'getInvestorPortfolios',
+    args: address ? [address] : undefined,
+    enabled: !!address,
+  })
+
+  // Get user's aToken balance
+  const { data: aTokenBalance } = useContractRead({
+    address: ATOKEN_MANAGER_ADDRESS,
+    abi: ATOKEN_MANAGER_ABI,
+    functionName: 'getBalance',
+    args: address && MXNB_ADDRESS ? [address, MXNB_ADDRESS] : undefined,
+    enabled: !!address && !!MXNB_ADDRESS,
+  })
+
+  // Get user's positions
+  const { data: userPositions } = useContractRead({
+    address: ATOKEN_MANAGER_ADDRESS,
+    abi: ATOKEN_MANAGER_ABI,
+    functionName: 'getUserPositions',
+    args: address ? [address] : undefined,
+    enabled: !!address,
   })
 
   useEffect(() => {
@@ -28,27 +81,19 @@ export default function UserWalletStatus() {
     }
   }, [isMounted])
 
-  const handleCopyAddress = () => {
-    if (address) {
-      navigator.clipboard.writeText(address)
-      toast.success('Dirección copiada al portapapeles')
-    }
-  }
+  const hasPortfolio = portfolios && portfolios.length > 0
+  const balance = aTokenBalance || 0n
+  const positions = userPositions || []
 
-  const handleShowQR = () => {
-    toast.info('Función QR próximamente disponible')
-  }
-
-  // Convert ETH balance to MXN (mock conversion rate)
-  const balanceInMXN = accountBalance.data?.value
-    ? (parseFloat(accountBalance.data.formatted) * 50000).toFixed(2) // Mock rate: 1 ETH = 50,000 MXN
-    : '0.00'
+  // Format aToken balance (assuming 18 decimals for MXNB)
+  const formattedBalance = formatUnits(balance, 18)
+  const balanceInMXN = parseFloat(formattedBalance).toFixed(2)
 
   if (!isMounted || !sdkHasLoaded) {
     return (
       <Card className="border-dashed border-2">
         <CardHeader>
-          <CardTitle>Wallet de Usuario</CardTitle>
+          <CardTitle>Portfolio Manager</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-lg">cargando...</p>
@@ -60,73 +105,99 @@ export default function UserWalletStatus() {
   return (
     <Card className="border-dashed border-2">
       <CardHeader>
-        <CardTitle>Wallet de Usuario</CardTitle>
+        <CardTitle>Portfolio Manager</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 lg:space-y-2">
         {status === 'connected' && address ? (
           <>
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-              <div className="flex items-center justify-between lg:flex-1 lg:mr-6">
-                <div>
-                  <p className="text-sm font-medium">Cosme Fulanito <span className="text-muted-foreground">@cosmefulanito</span></p>
-                  <p className="text-xs text-muted-foreground">Balance: <span className="text-green-600 font-semibold">${balanceInMXN} MXN</span></p>
-                  <p className="text-muted-foreground text-xs lg:inline lg:ml-4">
-                    Dirección: <span className="font-mono">{truncateString(address)}</span>
-                  </p>
+            {hasPortfolio ? (
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                <div className="flex items-center justify-between lg:flex-1 lg:mr-6">
+                  <div>
+                    <p className="text-sm font-medium">Portfolio Activo <span className="text-muted-foreground">#{portfolios[0]?.slice(-6)}</span></p>
+                    <p className="text-xs text-muted-foreground">Posiciones gestionadas: <span className="text-blue-600 font-semibold">{positions.length}</span></p>
+                    <p className="text-muted-foreground text-xs lg:inline lg:ml-4">
+                      Balance aTokens: <span className="font-mono text-green-600">{balanceInMXN} MXNB</span>
+                    </p>
+                  </div>
+                  <div className="flex gap-1 lg:hidden">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 w-7 p-0"
+                    >
+                      <TrendingUp className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 w-7 p-0"
+                    >
+                      <PieChart className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex gap-1 lg:hidden">
+
+                <div className="hidden lg:flex gap-1">
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={handleCopyAddress}
                     className="h-7 w-7 p-0"
                   >
-                    <Copy className="h-3 w-3" />
+                    <TrendingUp className="h-3 w-3" />
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={handleShowQR}
                     className="h-7 w-7 p-0"
                   >
-                    <QrCode className="h-3 w-3" />
+                    <PieChart className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
+            ) : (
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                <div className="flex items-center justify-between lg:flex-1 lg:mr-6">
+                  <div>
+                    <p className="text-sm font-medium">Sin Portfolio <span className="text-muted-foreground">Gestión Disponible</span></p>
+                    <p className="text-xs text-muted-foreground">Puedes crear un portfolio para gestión profesional</p>
+                  </div>
+                  <div className="flex gap-1 lg:hidden">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 w-7 p-0"
+                    >
+                      <Wallet className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
 
-              <div className="hidden lg:flex gap-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCopyAddress}
-                  className="h-7 w-7 p-0"
-                >
-                  <Copy className="h-3 w-3" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleShowQR}
-                  className="h-7 w-7 p-0"
-                >
-                  <QrCode className="h-3 w-3" />
-                </Button>
+                <div className="hidden lg:flex gap-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 w-7 p-0"
+                  >
+                    <Wallet className="h-3 w-3" />
+                  </Button>
+                </div>
               </div>
-            </div>
+            )}
 
-            <p className="text-sm text-green-600 lg:hidden">
-              Tu wallet está activa y lista para operar.
+            <p className="text-sm text-blue-600 lg:hidden">
+              {hasPortfolio ? 'Portfolio bajo gestión profesional.' : 'Gestión disponible con asesores verificados.'}
             </p>
 
+            {/* Action buttons would go here - keeping space for future AddMXNB/WithdrawMXNB equivalent */}
             <div className="space-y-4 lg:space-y-0 lg:flex lg:gap-4">
-              <AddMXNB />
-              <WithdrawMXNB />
+              {/* Future portfolio management actions */}
             </div>
           </>
         ) : (
           <>
             <p className="text-muted-foreground">
-              Aún no tienes una wallet conectada. Conecta tu wallet para continuar.
+              Conecta tu wallet para ver el estado de tu portfolio.
             </p>
           </>
         )}

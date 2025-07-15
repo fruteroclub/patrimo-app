@@ -1,0 +1,412 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.19;
+
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
+/**
+ * @title PatrimoFactory
+ * @notice Factory contract for deploying PortfolioManager instances
+ */
+contract PatrimoFactory is Ownable {
+    // State variables
+    mapping(address => address[]) public investorPortfolios;
+    mapping(address => bool) public isPortfolioManager;
+    mapping(address => bool) public verifiedAdvisors;
+
+    address public aTokenManager;
+    uint256 public portfolioCount;
+
+    // Events
+    event PortfolioManagerCreated(address indexed investor, address indexed portfolioManager, address indexed advisor);
+    event AdvisorVerified(address indexed advisor);
+    event AdvisorRevoked(address indexed advisor);
+
+    constructor(address _aTokenManager) Ownable(msg.sender) {
+        aTokenManager = _aTokenManager;
+    }
+
+    /**
+     * @notice Creates a new PortfolioManager for an investor
+     */
+    function createPortfolioManager(address _advisor) external returns (address) {
+        require(verifiedAdvisors[_advisor], "Advisor not verified");
+
+        PortfolioManager newPortfolio = new PortfolioManager(msg.sender, _advisor, aTokenManager);
+
+        address portfolioAddress = address(newPortfolio);
+        investorPortfolios[msg.sender].push(portfolioAddress);
+        isPortfolioManager[portfolioAddress] = true;
+        portfolioCount++;
+
+        // Authorize the new portfolio in aTokenManager
+        IATokenManager(aTokenManager).authorizePortfolio(portfolioAddress);
+
+        emit PortfolioManagerCreated(msg.sender, portfolioAddress, _advisor);
+
+        return portfolioAddress;
+    }
+
+    /**
+     * @notice Verifies a financial advisor
+     */
+    function verifyAdvisor(address _advisor) external onlyOwner {
+        verifiedAdvisors[_advisor] = true;
+        emit AdvisorVerified(_advisor);
+    }
+
+    /**
+     * @notice Revokes advisor verification
+     */
+    function revokeAdvisor(address _advisor) external onlyOwner {
+        verifiedAdvisors[_advisor] = false;
+        emit AdvisorRevoked(_advisor);
+    }
+
+    /**
+     * @notice Gets all portfolios for an investor
+     */
+    function getInvestorPortfolios(address _investor) external view returns (address[] memory) {
+        return investorPortfolios[_investor];
+    }
+}
+
+/**
+ * @title PortfolioManager
+ * @notice Self-custodial portfolio management contract
+ */
+contract PortfolioManager {
+    using SafeERC20 for IERC20;
+
+    // Position types
+    enum PositionType {
+        SPOT,
+        YIELD
+    }
+
+    // Position struct
+    struct Position {
+        uint256 positionId;
+        address asset;
+        uint256 amount;
+        uint256 timestamp;
+        PositionType positionType;
+        string description; // e.g., "USDC -> ETH swap" or "AAVE deposit"
+    }
+
+    // State variables
+    address public immutable owner;
+    address public advisor;
+    address public immutable aTokenManager;
+
+    uint256 public positionCounter;
+    mapping(uint256 => Position) public positions;
+    mapping(address => uint256) public assetBalances;
+    uint256[] public positionIds;
+
+    // Events
+    event PositionCreated(
+        uint256 indexed positionId,
+        address indexed asset,
+        uint256 amount,
+        PositionType positionType,
+        string description
+    );
+    event Deposited(address indexed asset, uint256 amount, address indexed from);
+    event Withdrawn(address indexed asset, uint256 amount, address indexed to);
+    event AdvisorUpdated(address indexed oldAdvisor, address indexed newAdvisor);
+
+    // Modifiers
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner");
+        _;
+    }
+
+    modifier onlyAdvisor() {
+        require(msg.sender == advisor, "Only advisor");
+        _;
+    }
+
+    modifier onlyAuthorized() {
+        require(msg.sender == owner || msg.sender == advisor, "Not authorized");
+        _;
+    }
+
+    constructor(address _owner, address _advisor, address _aTokenManager) {
+        owner = _owner;
+        advisor = _advisor;
+        aTokenManager = _aTokenManager;
+    }
+
+    /**
+     * @notice Deposits assets into the portfolio
+     * @dev Can be called by owner or advisor to fund the portfolio
+     */
+    function deposit(address asset, uint256 amount) external {
+        require(amount > 0, "Amount must be greater than 0");
+
+        // Transfer tokens to this contract
+        IERC20(asset).safeTransferFrom(msg.sender, address(this), amount);
+
+        // Update balance
+        assetBalances[asset] += amount;
+
+        emit Deposited(asset, amount, msg.sender);
+    }
+
+    /**
+     * @notice Creates a new position (called by advisor after executing trades off-chain)
+     * @dev This tracks the position after the trade has been executed
+     */
+    function createPosition(
+        address asset,
+        uint256 amount,
+        PositionType positionType,
+        string calldata description
+    ) external onlyAdvisor returns (uint256) {
+        require(assetBalances[asset] >= amount, "Insufficient asset balance");
+
+        uint256 positionId = ++positionCounter;
+
+        positions[positionId] = Position({
+            positionId: positionId,
+            asset: asset,
+            amount: amount,
+            timestamp: block.timestamp,
+            positionType: positionType,
+            description: description
+        });
+
+        positionIds.push(positionId);
+
+        // Mint aTokens to owner
+        IATokenManager(aTokenManager).mintATokens(owner, asset, amount, positionId);
+
+        emit PositionCreated(positionId, asset, amount, positionType, description);
+
+        return positionId;
+    }
+
+    /**
+     * @notice Updates asset balances after a swap
+     * @dev Called by advisor after executing swaps through API
+     */
+    function updateBalancesAfterSwap(
+        address assetIn,
+        uint256 amountIn,
+        address assetOut,
+        uint256 amountOut,
+        string calldata description
+    ) external onlyAdvisor {
+        require(assetBalances[assetIn] >= amountIn, "Insufficient balance for swap");
+
+        // Update balances
+        assetBalances[assetIn] -= amountIn;
+        assetBalances[assetOut] += amountOut;
+
+        // Create position record for the swap
+        uint256 positionId = ++positionCounter;
+
+        positions[positionId] = Position({
+            positionId: positionId,
+            asset: assetOut,
+            amount: amountOut,
+            timestamp: block.timestamp,
+            positionType: PositionType.SPOT,
+            description: description
+        });
+
+        positionIds.push(positionId);
+
+        // Update aTokens
+        IATokenManager(aTokenManager).burnATokens(owner, assetIn, amountIn);
+        IATokenManager(aTokenManager).mintATokens(owner, assetOut, amountOut, positionId);
+
+        emit PositionCreated(positionId, assetOut, amountOut, PositionType.SPOT, description);
+    }
+
+    /**
+     * @notice Withdraws funds from the portfolio
+     * @dev Only owner can withdraw
+     */
+    function withdraw(address asset, uint256 amount, address to) public onlyOwner {
+        require(to != address(0), "Invalid recipient");
+        require(assetBalances[asset] >= amount, "Insufficient balance");
+
+        // Update balance
+        assetBalances[asset] -= amount;
+
+        // Update aTokens
+        IATokenManager(aTokenManager).burnATokens(owner, asset, amount);
+
+        // Transfer funds
+        IERC20(asset).safeTransfer(to, amount);
+
+        emit Withdrawn(asset, amount, to);
+    }
+
+    /**
+     * @notice Withdraws all funds of a specific asset
+     */
+    function withdrawAll(address asset, address to) external onlyOwner {
+        uint256 balance = assetBalances[asset];
+        if (balance > 0) {
+            withdraw(asset, balance, to);
+        }
+    }
+
+    /**
+     * @notice Updates the advisor address
+     */
+    function updateAdvisor(address newAdvisor) external onlyOwner {
+        require(newAdvisor != address(0), "Invalid advisor");
+        address oldAdvisor = advisor;
+        advisor = newAdvisor;
+        emit AdvisorUpdated(oldAdvisor, newAdvisor);
+    }
+
+    /**
+     * @notice Gets all position IDs
+     */
+    function getAllPositions() external view returns (uint256[] memory) {
+        return positionIds;
+    }
+
+    /**
+     * @notice Gets the current balance of an asset
+     */
+    function getAssetBalance(address asset) external view returns (uint256) {
+        return assetBalances[asset];
+    }
+
+    /**
+     * @notice Emergency withdrawal function
+     * @dev Only owner can trigger in emergencies
+     */
+    function emergencyWithdraw(address token) external onlyOwner {
+        if (token == address(0)) {
+            // Withdraw ETH
+            uint256 balance = address(this).balance;
+            if (balance > 0) {
+                payable(owner).transfer(balance);
+            }
+        } else {
+            // Withdraw ERC20
+            uint256 balance = IERC20(token).balanceOf(address(this));
+            if (balance > 0) {
+                // Update tracked balance
+                assetBalances[token] = 0;
+                IERC20(token).safeTransfer(owner, balance);
+            }
+        }
+    }
+
+    // Receive ETH
+    receive() external payable {
+        assetBalances[address(0)] += msg.value;
+        emit Deposited(address(0), msg.value, msg.sender);
+    }
+}
+
+/**
+ * @title IATokenManager
+ * @notice Interface for the aToken manager
+ */
+interface IATokenManager {
+    function mintATokens(address to, address asset, uint256 amount, uint256 positionId) external;
+
+    function burnATokens(address from, address asset, uint256 amount) external;
+
+    function authorizePortfolio(address portfolio) external;
+}
+
+/**
+ * @title ATokenManager
+ * @notice Manages aTokens representing portfolio positions
+ */
+contract ATokenManager is Ownable {
+    // Mapping: user => asset => balance
+    mapping(address => mapping(address => uint256)) public userAssetBalances;
+
+    // Mapping: user => positionIds[]
+    mapping(address => uint256[]) public userPositions;
+
+    // Authorized portfolio managers
+    mapping(address => bool) public authorizedPortfolios;
+
+    // Factory address
+    address public factory;
+
+    // Events
+    event ATokensMinted(address indexed user, address indexed asset, uint256 amount, uint256 positionId);
+    event ATokensBurned(address indexed user, address indexed asset, uint256 amount);
+    event PortfolioAuthorized(address indexed portfolio);
+
+    modifier onlyAuthorizedPortfolio() {
+        require(authorizedPortfolios[msg.sender], "Not authorized portfolio");
+        _;
+    }
+
+    modifier onlyFactory() {
+        require(msg.sender == factory, "Only factory");
+        _;
+    }
+
+    constructor() Ownable(msg.sender) {}
+
+    /**
+     * @notice Sets the factory address
+     */
+    function setFactory(address _factory) external onlyOwner {
+        require(factory == address(0), "Factory already set");
+        factory = _factory;
+    }
+
+    /**
+     * @notice Authorizes a portfolio manager
+     */
+    function authorizePortfolio(address portfolio) external onlyFactory {
+        authorizedPortfolios[portfolio] = true;
+        emit PortfolioAuthorized(portfolio);
+    }
+
+    /**
+     * @notice Mints aTokens to a user
+     */
+    function mintATokens(
+        address to,
+        address asset,
+        uint256 amount,
+        uint256 positionId
+    ) external onlyAuthorizedPortfolio {
+        userAssetBalances[to][asset] += amount;
+        userPositions[to].push(positionId);
+
+        emit ATokensMinted(to, asset, amount, positionId);
+    }
+
+    /**
+     * @notice Burns aTokens from a user
+     */
+    function burnATokens(address from, address asset, uint256 amount) external onlyAuthorizedPortfolio {
+        require(userAssetBalances[from][asset] >= amount, "Insufficient aToken balance");
+        userAssetBalances[from][asset] -= amount;
+
+        emit ATokensBurned(from, asset, amount);
+    }
+
+    /**
+     * @notice Gets user's aToken balance for an asset
+     */
+    function getBalance(address user, address asset) external view returns (uint256) {
+        return userAssetBalances[user][asset];
+    }
+
+    /**
+     * @notice Gets all position IDs for a user
+     */
+    function getUserPositions(address user) external view returns (uint256[] memory) {
+        return userPositions[user];
+    }
+}
