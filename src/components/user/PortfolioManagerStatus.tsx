@@ -54,7 +54,6 @@ export default function PortfolioManagerStatus() {
     abi: PATRIMO_FACTORY_ABI,
     functionName: 'getInvestorPortfolios',
     args: address ? [address] : undefined,
-    enabled: !!address,
   })
 
   // Get user's aToken balance
@@ -63,7 +62,6 @@ export default function PortfolioManagerStatus() {
     abi: ATOKEN_MANAGER_ABI,
     functionName: 'getBalance',
     args: address && MXNB_ADDRESS ? [address, MXNB_ADDRESS] : undefined,
-    enabled: !!address && !!MXNB_ADDRESS,
   })
 
   // Get user's positions
@@ -72,7 +70,6 @@ export default function PortfolioManagerStatus() {
     abi: ATOKEN_MANAGER_ABI,
     functionName: 'getUserPositions',
     args: address ? [address] : undefined,
-    enabled: !!address,
   })
 
   useEffect(() => {
@@ -82,7 +79,7 @@ export default function PortfolioManagerStatus() {
   }, [isMounted])
 
   const hasPortfolio = portfolios && portfolios.length > 0
-  const balance = aTokenBalance || 0n
+  const balance = aTokenBalance || BigInt(0)
   const positions = userPositions || []
 
   // Format aToken balance (assuming 18 decimals for MXNB)

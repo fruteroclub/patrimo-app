@@ -16,17 +16,15 @@ export type MenuItemType = {
 
 const MENU_ITEMS: MenuItemType[] = [
   {
-    displayText: 'club',
-    href: '/club',
+    displayText: 'Inversionista',
+    href: '/dashboards/user',
     isMobileOnly: false,
   },
   {
-    displayText: 'ecosistema',
-    href: '/ecosistema',
+    displayText: 'Asesor',
+    href: '/dashboards/advisor',
     isMobileOnly: false,
   },
-  { displayText: 'recursos', href: '/recursos', isMobileOnly: false },
-  { displayText: '$PULPA', href: '/pulpa', isMobileOnly: false },
 ]
 
 export default function Navbar() {

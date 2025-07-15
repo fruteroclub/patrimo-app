@@ -2,6 +2,8 @@
 
 [▶️ Watch Demo](https://youtu.be/V0GsJ7MxPTY)
 [📝 Smart Contracts](https://github.com/fruteroclub/patrimo-contracts)
+[📝 Patrimo Factory](https://sepolia.arbiscan.io/address/0x8C39714Bf42EBE33094c0D05C388521692c8bEc4)
+[📝 Patrimo ATokenManager](https://sepolia.arbiscan.io/address/0xD4B0DC75Af194138d71F40B2B1CB33E70692b91b)
 
 ---
 
