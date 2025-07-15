@@ -1,11 +1,10 @@
-// app/api/create-portal-client/route.ts
 import { NextResponse } from 'next/server'
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 
 export async function POST() {
   try {
     const token = process.env.PORTAL_API_KEY
-    console.log('🔐 Custodian token usado:', token)
+    if (!token) throw new Error('PORTAL_API_KEY no está definido')
 
     const res = await axios.post(
       'https://api.portalhq.io/api/v3/custodians/me/clients',
@@ -19,15 +18,15 @@ export async function POST() {
     )
 
     const { clientSessionToken, clientApiKey, id } = res.data
-    console.log('✅ Cliente creado:', { id, clientApiKey })
 
     return NextResponse.json({
       clientSessionToken,
       clientApiKey,
       clientId: id,
     })
-  } catch (error: any) {
-    console.error('❌ Error creando cliente en Portal:', error.response?.data || error.message)
+  } catch (error) {
+    const err = error as AxiosError
+    console.error('❌ Error creando cliente en Portal:', err.response?.data || err.message)
     return NextResponse.json({ error: 'Error creating Portal client' }, { status: 500 })
   }
 }
